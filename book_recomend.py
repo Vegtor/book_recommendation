@@ -1,24 +1,18 @@
 import pandas as pd
 
-
 def load_data(file_path):
     ratings = pd.read_csv('Downloads/ratings_cleaned.csv')
     ratings = ratings[ratings['Book-Rating']!=0]
     books = pd.read_csv('Downloads/books_cleaned.csv')
     return books, ratings
 
-def get_readers(df_books, df_ratings, name_of_book = None, name_of_author = None):
+def get_readers(df_books, df_ratings, name_of_book = None):
     dataset = pd.merge(df_ratings, df_books, on=['ISBN'])
     dataset_lowercase = dataset[['User-ID', 'Book-Title', 'Book-Author', 'Book-Rating']]
     dataset_lowercase['Book-Title'] = dataset_lowercase['Book-Title'].str.lower()
     dataset_lowercase['Book-Author'] = dataset_lowercase['Book-Author'].str.lower()
     if name_of_book is not None:
-        if name_of_author is not None:
-            readers = dataset_lowercase['User-ID'][(dataset_lowercase['Book-Title'] == name_of_book) & (dataset_lowercase['Book-Author'].str.contains(name_of_author))].tolist()
-        else:
-            readers = dataset_lowercase['User-ID'][(dataset_lowercase['Book-Title'] == name_of_book)].tolist()
-    elif name_of_author is not None:
-        readers = dataset_lowercase['User-ID'][(dataset_lowercase['Book-Author'] == name_of_author)].tolist()
+        readers = dataset_lowercase['User-ID'][(dataset_lowercase['Book-Title'] == name_of_book)].tolist()
     else:
         return None
 
@@ -41,20 +35,25 @@ def recomendation_v1(readers_books, ratings_data_raw, book_name):
     book_titles = dataset_of_other_books.columns.tolist()
 
     correlations = []
-    avgrating = []
+    avg_rating = []
 
     for book_title in list(dataset_of_other_books.columns.values):
         correlations.append(readers_books[book_name].corr(dataset_of_other_books[book_title]))
         tab = ratings_data_raw[ratings_data_raw['Book-Title'] == book_title]
-        avgrating.append(tab['Book-Rating'].min())
-    corr_fellowship = pd.DataFrame(list(zip(book_titles, correlations, avgrating)), columns=['book', 'corr', 'avg_rating'])
+        avg_rating.append(tab['Book-Rating'].min())
+    corr_fellowship = pd.DataFrame(list(zip(book_titles, correlations, avg_rating)), columns=['book', 'corr', 'avg_rating'])
     corr_fellowship.head()
 
     result_list = (corr_fellowship.sort_values('corr', ascending=False).head(10))
     worst_list = (corr_fellowship.sort_values('corr', ascending=False).tail(10))
     return result_list, worst_list
 
+
+
+
+
 df_books, df_ratings = load_data("Downloads/")
-name_of_book = 'the fellowship of the ring (the lord of the rings, part 1)'
-dataset_corr, ratings_data_raw  = get_readers(df_books, df_ratings, name_of_book = name_of_book)
-result_list, worst_list = recomendation_v1(dataset_corr, ratings_data_raw, name_of_book)
+#name_of_book = 'the fellowship of the ring (the lord of the rings, part 1)'
+#dataset_corr, ratings_data_raw  = get_readers(df_books, df_ratings, name_of_book = name_of_book)
+#result_list, worst_list = recomendation_v1(dataset_corr, ratings_data_raw, name_of_book)
+k = 5

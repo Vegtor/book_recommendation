@@ -47,4 +47,3 @@ def clean_isbn(df):
 def nan_rows(df):
     rows_with_nan = df[df.isna().any(axis=1)]
     return rows_with_nan
-
