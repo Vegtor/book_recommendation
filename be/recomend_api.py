@@ -31,7 +31,10 @@ def get_recommendations(
         )
 
         result_book = searched_book.to_dict(orient="records")
-        result = df.to_dict(orient="records")
+        if df:
+            result = df.to_dict(orient="records")
+        else:
+            result = []
         return {
             "searched_book": result_book,
             "recommendations": result

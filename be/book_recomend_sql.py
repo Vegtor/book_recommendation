@@ -24,11 +24,20 @@ def recomendation_sql_v3(book_name, author=None, book_publisher=None, year_pb=No
         raise Exception(-1, "No book found for this search query")
     book_id = int(book_id_df.iloc[0]['book_id'])
 
+    query_searched_book = text("""SELECT b."Book-Title"  AS book_name,
+                                         b."Book-Author" AS book_author,
+                                         b."Publisher"   AS publisher,
+                                         b."Year-Of-Publication" AS year, b."ISBN" AS isbn, b."Image-URL-M" AS url_m
+                                  FROM books b
+                                  WHERE b."id" = :book_id""")
+    with engine.connect() as conn:
+        searched_book = pd.read_sql(query_searched_book, conn, params={"book_id": book_id})
+
     query_avg = text("""SELECT user_id, book_id, avg_rating FROM get_avg_ratings_for_books_of_readers_id(:book_id)""")
     with engine.connect() as conn:
         df_corr = pd.read_sql(query_avg, conn, params={"book_id": book_id})
     if df_corr.empty or df_corr is None:
-        raise Exception(-1, "No usable data for recomendation for this search query")
+        return searched_book, []
     df_corr = df_corr.pivot(index='user_id', columns='book_id', values='avg_rating')
 
     dataset_of_other_books = df_corr.copy(deep=False)
@@ -48,10 +57,6 @@ def recomendation_sql_v3(book_name, author=None, book_publisher=None, year_pb=No
     query_all_info = text("""SELECT * FROM get_all_info_id(:book_id, 8)""")
     with engine.connect() as conn:
         df_all_info = pd.read_sql(query_all_info, conn, params={"book_id": book_id})
-
-    query_searched_book = text("""SELECT b."Book-Title" AS book_name, b."Book-Author" AS book_author, b."Publisher" AS publisher, b."Year-Of-Publication" AS year, b."ISBN" AS isbn, b."Image-URL-M" AS url_m FROM books b WHERE b."id" = :book_id""")
-    with engine.connect() as conn:
-        searched_book = pd.read_sql(query_searched_book, conn, params={"book_id": book_id})
 
     result = result_list.merge(df_all_info, left_on='book', right_on='book_id', how='left')
     result.drop(columns=['book'], inplace=True)

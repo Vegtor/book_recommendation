@@ -36,11 +36,13 @@ function App() {
             if (!res.ok) {
                 throw new Error(data.detail || `HTTP error ${res.status}`);
             }
-            else if (data.recommendations === []) {
-                throw new Error("No usable data for recommendation for this search query")
-            }
             setSearchedBook(data.searched_book?.[0] || null);
-            setRecommendations(data.recommendations || []);
+            if (!data.recommendations || data.recommendations.length === 0) {
+                console.error("No usable data for recommendation for this search query");
+                setError("No usable data for recommendation for this search query");
+            } else {
+                setRecommendations(data.recommendations);
+            }
         } catch (err) {
             console.error(err.message);
             setError(err.message);
