@@ -50,7 +50,7 @@ def recomendation_v1(df_books, df_ratings, book_name = None):
 
 
 
-df_books, df_ratings = load_data("Downloads/")
-name_of_book = '1984'
-result_list, worst_list = recomendation_v1(df_books, df_ratings, name_of_book)
-i = 5
+#df_books, df_ratings = load_data("Downloads/")
+#name_of_book = '1984'
+#result_list, worst_list = recomendation_v1(df_books, df_ratings, name_of_book)
+
