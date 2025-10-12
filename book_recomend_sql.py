@@ -26,7 +26,8 @@ def recomendation_sql(book_name):
         correlations.append(df_corr[book_name].corr(dataset_of_other_books[book_title]))
         avg_rating.append(df_corr[book_title].mean())
     corr_fellowship = pd.DataFrame(list(zip(book_titles, correlations, avg_rating)), columns=['book', 'corr', 'avg_rating'])
-    return corr_fellowship.head()
+    result_list = (corr_fellowship.sort_values('corr', ascending=False).head(10))
+    worst_list = (corr_fellowship.sort_values('corr', ascending=False).tail(10))
+    return result_list, worst_list
 
-neco = recomendation_sql("1984")
-k = 5
+#neco = recomendation_sql("1984")
