@@ -1,12 +1,14 @@
 import pandas as pd
 
 def load_data(file_path):
-    ratings = pd.read_csv('Downloads/ratings_cleaned.csv')
+    ratings = pd.read_csv(file_path + '/ratings_cleaned.csv')
     ratings = ratings[ratings['Book-Rating']!=0]
-    books = pd.read_csv('Downloads/books_cleaned.csv')
+    books = pd.read_csv(file_path + '/books_cleaned.csv')
     return books, ratings
 
-def recomendation_v1(df_books, df_ratings, book_name = None):
+def recomendation_v1(book_name = None):
+    df_books, df_ratings = load_data('Downloads')
+
     dataset = pd.merge(df_ratings, df_books, on=['ISBN'])
     dataset_lowercase = dataset[['User-ID', 'Book-Title', 'Book-Author', 'Book-Rating']]
     dataset_lowercase['Book-Title'] = dataset_lowercase['Book-Title'].str.lower()
