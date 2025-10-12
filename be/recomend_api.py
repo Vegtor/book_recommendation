@@ -22,7 +22,7 @@ def get_recommendations(
     isbn: Optional[str] = Query(None, description="ISBN of the book")
 ):
     try:
-        df = recomendation_sql_v3(
+        searched_book, df = recomendation_sql_v3(
             book_name=book_name,
             author=author,
             book_publisher=publisher,
@@ -30,15 +30,10 @@ def get_recommendations(
             isbn=isbn
         )
 
+        result_book = searched_book.to_dict(orient="records")
         result = df.to_dict(orient="records")
         return {
-            "input": {
-                "book_name": book_name,
-                "author": author,
-                "publisher": publisher,
-                "year": year,
-                "isbn": isbn
-            },
+            "searched_book": result_book,
             "recommendations": result
         }
 

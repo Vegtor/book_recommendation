@@ -49,11 +49,13 @@ def recomendation_sql_v3(book_name, author=None, book_publisher=None, year_pb=No
     with engine.connect() as conn:
         df_all_info = pd.read_sql(query_all_info, conn, params={"book_id": book_id})
 
+    query_searched_book = text("""SELECT b."Book-Title" AS book_name, b."Book-Author" AS book_author, b."Publisher" AS publisher, b."Year-Of-Publication" AS year, b."ISBN" AS isbn, b."Image-URL-M" AS url_m FROM books b WHERE b."id" = :book_id""")
+    with engine.connect() as conn:
+        searched_book = pd.read_sql(query_searched_book, conn, params={"book_id": book_id})
+
     result = result_list.merge(df_all_info, left_on='book', right_on='book_id', how='left')
     result.drop(columns=['book'], inplace=True)
-    return result
+    return searched_book, result
 
-
-#neco = recomendation_sql_v3('1984')
-#k = 5
-
+a , b = recomendation_sql_v3('1984')
+k = 5
