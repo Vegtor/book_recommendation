@@ -46,13 +46,13 @@ def recomendation_v1(book_name = None):
 
     result_list = (corr_fellowship.sort_values('corr', ascending=False).head(10))
     worst_list = (corr_fellowship.sort_values('corr', ascending=False).tail(10))
-    return result_list, worst_list
+    return result_list
 
 
 
 
 
-#df_books, df_ratings = load_data("Downloads/")
+
 #name_of_book = '1984'
-#result_list, worst_list = recomendation_v1(df_books, df_ratings, name_of_book)
+#result_list, worst_list = recomendation_v1(name_of_book)
 
