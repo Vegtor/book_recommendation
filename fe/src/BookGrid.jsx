@@ -32,7 +32,7 @@ export default function BookGrid({ books }) {
                 </button>
                 <span>
           {currentPage} / {totalPages}
-        </span>
+                </span>
                 <button
                     onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                     disabled={currentPage === totalPages}

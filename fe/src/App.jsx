@@ -11,6 +11,7 @@ function App() {
 
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [recommendations, setRecommendations] = useState([]);
+    const [searchedBook, setSearchedBook] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -19,6 +20,7 @@ function App() {
         setLoading(true);
         setError("");
         setRecommendations([]);
+        setSearchedBook(null);
 
         try {
             const params = new URLSearchParams({ book_name: book });
@@ -34,6 +36,10 @@ function App() {
             if (!res.ok) {
                 throw new Error(data.detail || `HTTP error ${res.status}`);
             }
+            else if (data.recommendations === []) {
+                throw new Error("No usable data for recommendation for this search query")
+            }
+            setSearchedBook(data.searched_book?.[0] || null);
             setRecommendations(data.recommendations || []);
         } catch (err) {
             console.error(err.message);
@@ -96,6 +102,22 @@ function App() {
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: "red" }}>{error}</p>}
             </div>
+            {searchedBook && (
+                <div className="searched-book">
+                    <h3>Book you searched for:</h3>
+                    <div className="searched-book-card">
+                        <img src={searchedBook.url_m} alt={searchedBook.book_name} />
+                        <div>
+                            <h4>{searchedBook.book_name}</h4>
+                            <p><b>Author:</b> {searchedBook.book_author}</p>
+                            <p><b>Publisher:</b> {searchedBook.publisher}</p>
+                            <p><b>Year:</b> {searchedBook.year}</p>
+                            <p><b>ISBN:</b> {searchedBook.isbn}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {recommendations.length > 0 && <BookGrid books={recommendations} />}
         </div>
