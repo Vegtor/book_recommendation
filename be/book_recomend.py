@@ -49,10 +49,3 @@ def recomendation_v1(book_name = None):
     return result_list
 
 
-
-
-
-
-#name_of_book = '1984'
-#result_list, worst_list = recomendation_v1(name_of_book)
-
