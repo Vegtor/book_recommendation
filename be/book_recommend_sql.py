@@ -1,7 +1,14 @@
 import pandas as pd
 from sqlalchemy import create_engine, text
+import os
 
-DATABASE_URL = "postgresql+psycopg2://book_owner:book_pass@localhost:5432/book_db"
+db_user = os.getenv("POSTGRES_USER", "book_owner")
+db_pass = os.getenv("POSTGRES_PASSWORD", "book_pass")
+db_name = os.getenv("POSTGRES_DB", "book_db")
+db_host = os.getenv("POSTGRES_HOST", "localhost")
+db_port = os.getenv("POSTGRES_PORT", "5432")
+
+DATABASE_URL = f"postgresql+psycopg2://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
 engine = create_engine(DATABASE_URL)
 
 def recomendation_sql_v3(book_name, author=None, book_publisher=None, year_pb=None, isbn=None):
@@ -27,7 +34,9 @@ def recomendation_sql_v3(book_name, author=None, book_publisher=None, year_pb=No
     query_searched_book = text("""SELECT b."Book-Title"  AS book_name,
                                          b."Book-Author" AS book_author,
                                          b."Publisher"   AS publisher,
-                                         b."Year-Of-Publication" AS year, b."ISBN" AS isbn, b."Image-URL-M" AS url_m
+                                         b."Year-Of-Publication" AS year, 
+                                         b."ISBN" AS isbn, 
+                                         b."Image-URL-M" AS url_m
                                   FROM books b
                                   WHERE b."id" = :book_id""")
     with engine.connect() as conn:
@@ -37,22 +46,23 @@ def recomendation_sql_v3(book_name, author=None, book_publisher=None, year_pb=No
     with engine.connect() as conn:
         df_corr = pd.read_sql(query_avg, conn, params={"book_id": book_id})
     if df_corr.empty or df_corr is None:
-        return searched_book, []
+        return searched_book, None
     df_corr = df_corr.pivot(index='user_id', columns='book_id', values='avg_rating')
 
     dataset_of_other_books = df_corr.copy(deep=False)
     dataset_of_other_books.drop(book_id, axis=1, inplace=True)
     books_ids = dataset_of_other_books.columns.tolist()
 
-    correlations = []
-    avg_rating = []
+    avg_rating = dataset_of_other_books.mean().round(2)
 
-    for id_of_book in books_ids:
-        correlations.append(df_corr[book_id].corr(dataset_of_other_books[id_of_book]))
-        avg_rating.append(df_corr[id_of_book].mean())
-    corr_fellowship = pd.DataFrame(list(zip(books_ids, correlations, avg_rating)),
-                                   columns=['book', 'corr', 'avg_rating'])
-    result_list = corr_fellowship.sort_values('corr', ascending=False).head(10)
+    correlations = dataset_of_other_books.corrwith(df_corr[book_id])
+    correlation_df = pd.DataFrame({
+            'book': correlations.index.values,
+            'corr': correlations.values,
+            'avg_rating': avg_rating.values
+        })
+
+    result_list = correlation_df.sort_values('corr', ascending=False)
 
     query_all_info = text("""SELECT * FROM get_all_info_id(:book_id, 8)""")
     with engine.connect() as conn:
@@ -62,5 +72,3 @@ def recomendation_sql_v3(book_name, author=None, book_publisher=None, year_pb=No
     result.drop(columns=['book'], inplace=True)
     return searched_book, result
 
-a , b = recomendation_sql_v3('1984')
-k = 5

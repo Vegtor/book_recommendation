@@ -1,13 +1,16 @@
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-from book_recomend_sql import recomendation_sql_v3
+from book_recommend_sql import recomendation_sql_v3
+import os
 
 app = FastAPI(title="Book Recommendation API")
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,7 +34,7 @@ def get_recommendations(
         )
 
         result_book = searched_book.to_dict(orient="records")
-        if df:
+        if df is not None and not df.empty:
             result = df.to_dict(orient="records")
         else:
             result = []

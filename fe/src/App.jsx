@@ -2,6 +2,7 @@ import { useState } from "react";
 import BookGrid from "./BookGrid";
 import "./App.css";
 
+
 function App() {
     const [book, setBook] = useState("");
     const [author, setAuthor] = useState("");
@@ -31,7 +32,10 @@ function App() {
                 if (isbn.trim()) params.append("isbn", isbn);
             }
 
-            const res = await fetch(`http://127.0.0.1:8000/recommend_v3?${params.toString()}`);
+            const backendUrl = import.meta.env.VITE_BACKEND_URL;
+            console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
+            const res = await fetch(`${backendUrl}/recommend_v3?${params.toString()}`);
+            
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.detail || `HTTP error ${res.status}`);
@@ -119,7 +123,6 @@ function App() {
                     </div>
                 </div>
             )}
-
 
             {recommendations.length > 0 && <BookGrid books={recommendations} />}
         </div>
