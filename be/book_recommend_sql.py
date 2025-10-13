@@ -8,7 +8,8 @@ db_name = os.getenv("POSTGRES_DB", "book_db")
 db_host = os.getenv("POSTGRES_HOST", "localhost")
 db_port = os.getenv("POSTGRES_PORT", "5432")
 
-DATABASE_URL = f"postgresql+psycopg2://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+#DATABASE_URL = f"postgresql+psycopg2://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 
 def recomendation_sql_v3(book_name, author=None, book_publisher=None, year_pb=None, isbn=None):
