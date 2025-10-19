@@ -1,5 +1,7 @@
 import { useState } from "react";
 import BookGrid from "./BookGrid";
+import BookGridGoodreads from "./BookGridGoodreads";
+import { SearchedBook, SearchedBookGoodreads } from "./SearchedBook";
 import "./App.css";
 
 
@@ -15,6 +17,7 @@ function App() {
     const [searchedBook, setSearchedBook] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [selectedVersion, setSelectedVersion] = useState("v1");
 
     const fetchRecs = async () => {
         if (!book.trim()) return;
@@ -24,7 +27,7 @@ function App() {
         setSearchedBook(null);
 
         try {
-            const params = new URLSearchParams({ book_name: book });
+            const params = new URLSearchParams({ book_name: book, version: selectedVersion });
             if (showAdvanced) {
                 if (author.trim()) params.append("author", author);
                 if (publisher.trim()) params.append("publisher", publisher);
@@ -32,9 +35,16 @@ function App() {
                 if (isbn.trim()) params.append("isbn", isbn);
             }
 
-            const backendUrl = import.meta.env.VITE_BACKEND_URL;
-            console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
-            const res = await fetch(`${backendUrl}/recommend_v3?${params.toString()}`);
+            const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+            let backendCall;
+
+            if (selectedVersion === "v1" || selectedVersion === "v1_1"){
+                backendCall = `${backendUrl}/recommend_v1?${params.toString()}`;
+            }
+            else{
+                backendCall = `${backendUrl}/recommend_v2?${params.toString()}`;
+            }
+            const res = await fetch(backendCall);
             
             const data = await res.json();
             if (!res.ok) {
@@ -91,6 +101,7 @@ function App() {
                             value={publisher}
                             onChange={(e) => setPublisher(e.target.value)}
                             placeholder="Publisher"
+                            disabled={selectedVersion === "v2" || selectedVersion === "v2_1"}
                         />
                         <input
                             value={year}
@@ -102,29 +113,66 @@ function App() {
                             onChange={(e) => setIsbn(e.target.value)}
                             placeholder="ISBN"
                         />
+                        <div className="version-checkboxes">
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="version"
+                                    value="v1"
+                                    checked={selectedVersion === "v1"}
+                                    onChange={() => setSelectedVersion("v1")}
+                                />
+                                &nbsp;v1
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="version"
+                                    value="v1_1"
+                                    checked={selectedVersion === "v1_1"}
+                                    onChange={() => setSelectedVersion("v1_1")}
+                                />
+                                &nbsp;v1.1
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="version"
+                                    value="v2"
+                                    checked={selectedVersion === "v2"}
+                                    onChange={() => {
+                                        setSelectedVersion("v2");
+                                        setPublisher("");
+                                    }}
+                                />
+                                &nbsp;v2
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="version"
+                                    value="v2_1"
+                                    checked={selectedVersion === "v2_1"}
+                                    onChange={() => {
+                                        setSelectedVersion("v2_1");
+                                        setPublisher("");
+                                    }}
+                                />
+                                &nbsp;v2.1
+                            </label>
+                        </div>
                     </div>
                 )}
 
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: "red" }}>{error}</p>}
             </div>
-            {searchedBook && (
-                <div className="searched-book">
-                    <h3>Book you searched for:</h3>
-                    <div className="searched-book-card">
-                        <img src={searchedBook.url_m} alt={searchedBook.book_name} />
-                        <div>
-                            <h4>{searchedBook.book_name}</h4>
-                            <p><b>Author:</b> {searchedBook.book_author}</p>
-                            <p><b>Publisher:</b> {searchedBook.publisher}</p>
-                            <p><b>Year:</b> {searchedBook.year}</p>
-                            <p><b>ISBN:</b> {searchedBook.isbn}</p>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {recommendations.length > 0 && <BookGrid books={recommendations} />}
+            {searchedBook && (selectedVersion === "v1" || selectedVersion === "v1_1") && <SearchedBook book={searchedBook} />}
+            {searchedBook && (selectedVersion === "v2" || selectedVersion === "v2_1") && <SearchedBookGoodreads book={searchedBook} />}
+
+            {recommendations.length > 0 && (selectedVersion === "v1" || selectedVersion === "v1_1") && <BookGrid books={recommendations} />}
+            {recommendations.length > 0 && (selectedVersion === "v2" || selectedVersion === "v2_1") && <BookGridGoodreads books={recommendations} />}
         </div>
     );
 }
