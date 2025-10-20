@@ -1,12 +1,8 @@
 import pandas as pd
-import numpy as np
 import kagglehub
-import chardet
 import os
 import zipfile
 import re
-
-from pandas.core.interchange.dataframe_protocol import DataFrame
 
 
 def data_download(file_path):
@@ -27,17 +23,17 @@ def data_download(file_path):
     df_books.to_csv(file_path + "/books.csv" , index=False)
     df_ratings.to_csv(file_path + "/ratings.csv" , index=False)
 
-def check_isbn(df):
-    pattern = re.compile(r'^[0-9Xx]+$')
-    invalid_mask = ~df['ISBN'].astype(str).str.match(pattern)
-    invalid_isbns = df.loc[invalid_mask, 'ISBN'].unique()
-    return pd.Series(invalid_isbns)
-
 def delete_missing_books(df_books, df_ratings):
     valid_isbns = set(df_books['ISBN'])
     cleaned_ratings = df_ratings[df_ratings['ISBN'].isin(valid_isbns)].copy()
     cleaned_ratings.reset_index(drop=True, inplace=True)
     return cleaned_ratings
+
+def check_isbn(df):
+    pattern = re.compile(r'^[0-9Xx]+$')
+    invalid_mask = ~df['ISBN'].astype(str).str.match(pattern)
+    invalid_isbns = df.loc[invalid_mask, 'ISBN'].unique()
+    return pd.Series(invalid_isbns)
 
 def clean_isbn(df):
     cleaned = df['ISBN'].str.replace(r'ISBN:|ISBN|[-"\t/\.=_*?\\+]', '', regex=True)

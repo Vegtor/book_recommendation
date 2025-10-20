@@ -23,7 +23,7 @@ class DatabaseManager:
             self.choice = db_choice
             self.engine = create_engine(
                 DATABASE_URLS[db_choice],
-                pool_timeout=30,
+                pool_timeout=120,
             )
         return self.engine
 

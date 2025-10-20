@@ -2,7 +2,7 @@ import numpy as np
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-from book_recommend_sql import recommendation_sql_v1
+from book_recommend_sql import recommendation_sql_v1, recommendation_sql_v1_1
 from book_recommend_goodreads import recommendation_sql_v2, recommendation_sql_v2_1
 import os
 
@@ -32,7 +32,7 @@ def get_recommendations_v1(
             searched_book, df = recommendation_sql_v1(book_name=book_name,author=author,book_publisher=publisher,
                                                       year_pb=year,isbn=isbn)
         else:
-            searched_book, df = recommendation_sql_v1(book_name=book_name, author=author, book_publisher=publisher,
+            searched_book, df = recommendation_sql_v1_1(book_name=book_name, author=author, book_publisher=publisher,
                                                       year_pb=year, isbn=isbn)
 
         result_book = searched_book.to_dict(orient="records")

@@ -86,5 +86,3 @@ def recommendation_sql_v2_1(book_name, author=None, year_pb=None, isbn=None):
         df_all_info = pd.read_sql(query_all_info, conn, params={"book_id": book_id})
     return searched_book, df_all_info
 
-neco = recommendation_sql_v2_1('1984')
-i = 5

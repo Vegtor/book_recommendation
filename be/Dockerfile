@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy all backend files
-COPY recommend_api.py book_recommend_sql.py ./
+COPY recommend_api.py book_recommend_sql.py book_recommend_goodreads.py database_manager.py ./
 
 # Expose port for FastAPI
 EXPOSE 8000
